@@ -21,3 +21,7 @@ def divide(a: float, b: float) -> float:
     if b == 0:
         raise ValueError("除数不能为 0")
     return a / b
+
+def power(a: float, b: float) -> float:
+    """返回 a 的 b 次方。"""
+    return a ** b
