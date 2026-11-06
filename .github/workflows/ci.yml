@@ -1,0 +1,52 @@
+# 工作流名称，会显示在 GitHub 仓库的 Actions 页面
+name: CI
+
+# 触发条件：什么时候运行这条流水线
+on:
+  push:
+    branches: [main]    # 推送到 main 分支时
+  pull_request:         # 有人提 Pull Request 时
+  workflow_dispatch:    # 允许在 Actions 页面手动点按钮运行
+
+jobs:
+  # 第一个任务：代码风格检查
+  lint:
+    runs-on: ubuntu-latest    # 在 GitHub 提供的 Linux 云端机器上运行
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v5
+
+      - name: 安装 Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip            # 缓存下载过的包，下次跑得更快
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 用 ruff 检查代码
+        run: ruff check .
+
+  # 第二个任务：跑测试
+  test:
+    needs: lint               # 等 lint 通过后才开始；lint 失败则跳过
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:                 # 矩阵：在 3 个 Python 版本上各跑一遍（并行）
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v5
+
+      - name: 安装 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行测试
+        run: pytest -v

@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+# 让测试文件能直接 import 根目录下的 calculator.py
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
