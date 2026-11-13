@@ -1,5 +1,5 @@
 # 工作流名称，会显示在 GitHub 仓库的 Actions 页面
-name: CI
+name: CI/CD
 
 # 触发条件：什么时候运行这条流水线
 on:
@@ -8,16 +8,22 @@ on:
   pull_request:         # 有人提 Pull Request 时
   workflow_dispatch:    # 允许在 Actions 页面手动点按钮运行
 
+# 默认权限：只能读代码（最小权限原则）。需要更多权限的任务单独申请，见下面的 deploy
+permissions:
+  contents: read
+
 jobs:
+  # ==================== CI：检查代码、跑测试 ====================
+
   # 第一个任务：代码风格检查
   lint:
     runs-on: ubuntu-latest    # 在 GitHub 提供的 Linux 云端机器上运行
     steps:
       - name: 拉取代码
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: 安装 Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip            # 缓存下载过的包，下次跑得更快
@@ -37,10 +43,10 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
     steps:
       - name: 拉取代码
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: 安装 Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -50,3 +56,45 @@ jobs:
 
       - name: 运行测试
         run: pytest -v
+
+  # ==================== CD：构建、部署 ====================
+
+  # 第三个任务：生成网页，打包成"构建产物"（artifact）
+  build:
+    needs: test               # 3 个 Python 版本的测试全部通过后才构建
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v7
+
+      - name: 安装 Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: 生成网页
+        run: python build_site.py
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site            # 把 site/ 文件夹打包，交给下面的 deploy 任务
+
+  # 第四个任务：发布到 GitHub Pages
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'   # 只有 main 分支才部署；PR 跑到 build 就停
+    runs-on: ubuntu-latest
+    permissions:              # 单独申请发布网页需要的权限
+      pages: write            # 允许发布到 GitHub Pages
+      id-token: write         # 让 GitHub 确认这次部署确实来自本仓库的流水线
+    environment:
+      name: github-pages      # 部署到的"环境"；可以在仓库设置里给它加人工审批
+      url: ${{ steps.deployment.outputs.page_url }}   # 网址会显示在运行结果页面上
+    concurrency:
+      group: pages            # 同一时间只允许一个部署，后来的排队等前一个完成
+      cancel-in-progress: false
+    steps:
+      - name: 发布网页
+        id: deployment
+        uses: actions/deploy-pages@v5
