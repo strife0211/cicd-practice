@@ -12,7 +12,7 @@ from pathlib import Path
 from calculator import add, divide, multiply, power, subtract
 
 # 网页标题（CD 练习 5：改这里，推送后看网站自动更新）
-TITLE = "这是Strife的 CI/CD 计算器"
+TITLE = "我的 CI/CD 计算器"
 
 # 网页输出到项目根目录下的 site/ 文件夹
 OUTPUT_DIR = Path(__file__).parent / "site"
