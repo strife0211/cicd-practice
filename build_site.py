@@ -24,6 +24,7 @@ def examples() -> list[tuple[str, float]]:
         ("2 + 3", add(2, 3)),
         ("10 - 4", subtract(10, 4)),
         ("3 × 4", multiply(3, 4)),
+        ("7 × 8", multiply(7, 8)),
         ("10 ÷ 4", divide(10, 4)),
         ("2 的 10 次方", power(2, 10)),
     ]
