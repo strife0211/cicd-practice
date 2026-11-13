@@ -288,6 +288,9 @@ https://<你的用户名>.github.io/cicd-practice/
 再推送一次。build 完成后，deploy 会停下来等待审批。点运行页面上的 **Review deployments**，
 勾选 `github-pages`，再点 **Approve and deploy**，才会真正上线。
 
+> 不一定会收到邮件或通知，像这里这样自己推送、自己审批时尤其如此。不用等通知，
+> 直接到 Actions 打开那次运行，页面上会提示正在等待审批，**Review deployments** 按钮就在那里。
+
 这就是 CD 的两种含义：
 
 | 设置 | 测试通过之后 | 叫法 |
