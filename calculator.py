@@ -3,7 +3,7 @@
 
 def add(a: float, b: float) -> float:
     """返回 a + b。"""
-    return a - b
+    return a + b
 
 
 def subtract(a: float, b: float) -> float:
